@@ -33,7 +33,6 @@ use Illuminate\Support\Str;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-use function route;
 use function view;
 
 /**
@@ -96,12 +95,10 @@ class UserMessagesModule extends AbstractModule implements ModuleBlockInterface
             ->delete();
 
         if ($context === ModuleBlockInterface::CONTEXT_USER_PAGE) {
-            $url = route(UserPage::class, ['tree' => $tree->name()]);
-        } else {
-            $url = route(TreePage::class, ['tree' => $tree->name()]);
+            return Registry::responseFactory()->redirect(UserPage::class, ['tree' => $tree->name()]);
         }
 
-        return redirect($url);
+        return Registry::responseFactory()->redirect(TreePage::class, ['tree' => $tree->name()]);
     }
 
     /**

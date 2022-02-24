@@ -27,8 +27,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-use function redirect;
-
 /**
  * Add a new child to a family.
  */
@@ -71,6 +69,6 @@ class AddChildToFamilyAction implements RequestHandlerInterface
 
         $url = Validator::parsedBody($request)->isLocalUrl()->string('url', $child->url());
 
-        return redirect($url);
+        return Registry::responseFactory()->redirectUrl($url);
     }
 }

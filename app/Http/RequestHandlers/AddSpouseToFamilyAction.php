@@ -27,8 +27,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-use function redirect;
-
 /**
  * Add a new spouse to a family.
  */
@@ -81,7 +79,7 @@ class AddSpouseToFamilyAction implements RequestHandlerInterface
             $link = 'WIFE';
         } else {
             // Family already has husband and wife
-            return redirect($family->url());
+            return Registry::responseFactory()->redirectUrl($family->url());
         }
 
         // Link the spouse to the family
@@ -89,6 +87,6 @@ class AddSpouseToFamilyAction implements RequestHandlerInterface
 
         $url = Validator::parsedBody($request)->isLocalUrl()->string('url', $spouse->url());
 
-        return redirect($url);
+        return Registry::responseFactory()->redirectUrl($url);
     }
 }
