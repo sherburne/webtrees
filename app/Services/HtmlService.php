@@ -61,6 +61,19 @@ class HtmlService
 
         // Allow image maps.
         $def->addAttribute('img', 'usemap', 'CDATA');
+        
+        // Allow iframes.
+        $iframe = $def->addElement('iframe', 'Block', 'Flow', 'Common', [
+            'align' => new HTMLPurifier_AttrDef_Enum(),
+            'frameborder' => new HTMLPurifier_AttrDef_Enum(),
+            'height' => 'Length',
+            'longdesc' => 'URI',
+            'name' => 'CDATA',
+            'scrolling' => new HTMLPurifier_AttrDef_Enum(),
+            'src' => 'URI',
+            'title' => 'CDATA',
+            'width' => 'Length',
+        ]);
 
         $map = $def->addElement('map', 'Block', 'Flow', 'Common', [
             'name'  => 'CDATA',
