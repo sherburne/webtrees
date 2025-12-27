@@ -2,10 +2,14 @@
 
 declare(strict_types=1);
 
+use Fisharebest\Webtrees\Fact;
 use Fisharebest\Webtrees\Individual;
 use Fisharebest\Webtrees\Module\ModuleTabInterface;
+use Fisharebest\Webtrees\Module\NotesTabModule;
 use Fisharebest\Webtrees\View;
 use Illuminate\Support\Collection;
+
+use function preg_match;
 
 /**
  * @var Individual                         $record
@@ -16,9 +20,25 @@ use Illuminate\Support\Collection;
 <div class="wt-tabs-individual" id="individual-tabs">
     <ul class="nav nav-tabs flex-wrap" role="tablist">
         <?php foreach ($tabs as $tab) : ?>
+            <?php
+            // Check if this is the notes tab and if the individual has notes
+            $has_notes = false;
+            if ($tab instanceof NotesTabModule) {
+                $facts = $record->facts();
+                foreach ($record->spouseFamilies() as $family) {
+                    if ($family->canShow()) {
+                        foreach ($family->facts() as $fact) {
+                            $facts->push($fact);
+                        }
+                    }
+                }
+                $callback = static fn (Fact $fact): bool => preg_match('/(?:^1|\n\d) NOTE/', $fact->gedcom()) === 1;
+                $has_notes = $facts->filter($callback)->isNotEmpty();
+            }
+            ?>
             <li class="nav-item" role="presentation">
                 <a class="nav-link<?= $tab->isGrayedOut($record) ? ' text-muted' : '' ?>" data-bs-toggle="tab" role="tab" data-wt-href="<?= e(route('module', ['module' => $tab->name(), 'action' => 'Tab', 'tree' => $record->tree()->name(), 'xref' => $record->xref()])) ?>" href="#<?= $tab->name() ?>">
-                    <?= $tab->tabTitle() ?>
+                    <?= $tab->tabTitle() ?><?= $has_notes ? ' ★' : '' ?>
                 </a>
             </li>
         <?php endforeach ?>
