@@ -21,19 +21,11 @@ use function preg_match;
     <ul class="nav nav-tabs flex-wrap" role="tablist">
         <?php foreach ($tabs as $tab) : ?>
             <?php
-            // Check if this is the notes tab and if the individual has notes
+            // Check if this is the notes tab and if the individual has at least one NOTE record (level-1)
             $has_notes = false;
             if ($tab instanceof NotesTabModule) {
-                $facts = $record->facts();
-                foreach ($record->spouseFamilies() as $family) {
-                    if ($family->canShow()) {
-                        foreach ($family->facts() as $fact) {
-                            $facts->push($fact);
-                        }
-                    }
-                }
-                $callback = static fn (Fact $fact): bool => preg_match('/(?:^1|\n\d) NOTE/', $fact->gedcom()) === 1;
-                $has_notes = $facts->filter($callback)->isNotEmpty();
+                // Check for level-1 NOTE records in the individual's GEDCOM (not level-2 notes in facts)
+                $has_notes = preg_match('/\n1 NOTE/', $record->gedcom() . ($record->pending ?? '')) === 1;
             }
             ?>
             <li class="nav-item" role="presentation">
