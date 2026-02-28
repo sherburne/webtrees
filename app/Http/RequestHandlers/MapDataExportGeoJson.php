@@ -2,7 +2,7 @@
 
 /**
  * webtrees: online genealogy
- * Copyright (C) 2025 webtrees development team
+ * Copyright (C) 2026 webtrees development team
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -52,7 +52,9 @@ final class MapDataExportGeoJson implements RequestHandlerInterface
             $parent = $this->map_data_service->findById((int) $parent_id);
         }
 
-        for ($tmp = $parent, $hierarchy = []; $tmp->id() !== null; $tmp = $tmp->parent()) {
+        $hierarchy = [];
+
+        for ($tmp = $parent; $tmp->id() !== null; $tmp = $tmp->parent()) {
             $hierarchy[] = $tmp->locationName();
         }
 
