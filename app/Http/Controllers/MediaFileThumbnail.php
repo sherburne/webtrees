@@ -26,6 +26,7 @@ use Fisharebest\Webtrees\Exceptions\ImageException;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
 use League\Flysystem\FilesystemException;
+use League\Flysystem\UnableToRetrieveMetadata;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -89,17 +90,15 @@ final class MediaFileThumbnail
                 $height        = (int) $params['h'];
                 $add_watermark = Auth::needsWatermark($media_file->media()->tree(), $user);
                 $path          = $media_file->filename();
-                $filename      = basename($path);
                 $filesystem    = $media_file->media()->tree()->mediaFilesystem();
 
                 try {
                     $last_modified = $filesystem->lastModified(path: $path);
-                } catch (FilesystemException $exception) {
-                    throw new ImageException(
-                        status_code: HttpStatusCode::InternalServerError,
-                        filename: $filename,
-                        error: 'File is not readable',
-                    );
+                } catch (FilesystemException | UnableToRetrieveMetadata) {
+                    // If we can't get a timestamp, it might be a limitation of the filesystem,
+                    // rather than a fatal error.  This is only used for cache-busting.
+                    // If we can't actually read the file's contents, then we will throw a 404 later.
+                    $last_modified = 0;
                 }
 
                 $cache_key = implode(separator: ':', array: [
