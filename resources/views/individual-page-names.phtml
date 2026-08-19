@@ -2,10 +2,14 @@
 
 declare(strict_types=1);
 
+use Fisharebest\Webtrees\Fact;
 use Fisharebest\Webtrees\Individual;
+use Illuminate\Support\Collection;
 
 /**
- * @var Individual $record
+ * @var bool                 $can_edit
+ * @var Collection<int,Fact> $notes_facts
+ * @var Individual           $record
  */
 ?>
 
@@ -18,4 +22,6 @@ use Fisharebest\Webtrees\Individual;
     <?php foreach ($record->facts(['SEX']) as $fact) : ?>
         <?= view('individual-page-sex', ['fact' => $fact]) ?>
     <?php endforeach ?>
+
+    <?= view('individual-page-notes', ['can_edit' => $can_edit, 'facts' => $notes_facts, 'individual' => $record]) ?>
 </div>

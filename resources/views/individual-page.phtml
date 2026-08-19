@@ -14,9 +14,11 @@ use Illuminate\Support\Collection;
 
 /**
  * @var string                                 $age
+ * @var bool                                   $can_edit
  * @var bool                                   $can_upload_media
  * @var Collection<int,Fact>                   $clipboard_facts
  * @var Collection<int,Media>                  $individual_media
+ * @var Collection<int,Fact>                   $notes_facts
  * @var Individual                             $record
  * @var Collection<int,string>                 $shares
  * @var Collection<int,ModuleSidebarInterface> $sidebars
@@ -42,7 +44,7 @@ use Illuminate\Support\Collection;
     <div class="row mb-4">
         <?= view('individual-page-images', ['can_upload_media' => $can_upload_media, 'individual_media' => $individual_media, 'record' => $record, 'tree' => $tree]) ?>
 
-        <?= view('individual-page-names', ['record' => $record]) ?>
+        <?= view('individual-page-names', ['can_edit' => $can_edit, 'notes_facts' => $notes_facts, 'record' => $record]) ?>
     </div>
 
     <?= view('individual-page-tabs', ['record' => $record, 'tabs' => $tabs]) ?>
@@ -52,7 +54,7 @@ use Illuminate\Support\Collection;
             <div class="row mb-4">
                 <?= view('individual-page-images', ['can_upload_media' => $can_upload_media, 'individual_media' => $individual_media, 'record' => $record, 'tree' => $tree]) ?>
 
-                <?= view('individual-page-names', ['record' => $record]) ?>
+                <?= view('individual-page-names', ['can_edit' => $can_edit, 'notes_facts' => $notes_facts, 'record' => $record]) ?>
             </div>
 
             <?= view('individual-page-tabs', ['record' => $record, 'tabs' => $tabs]) ?>

@@ -34,6 +34,7 @@ use Fisharebest\Webtrees\Module\ModuleSidebarInterface;
 use Fisharebest\Webtrees\Module\ModuleTabInterface;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\ClipboardService;
+use Fisharebest\Webtrees\Services\IndividualNotesService;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Services\UserService;
 use Fisharebest\Webtrees\Validator;
@@ -57,18 +58,22 @@ final class IndividualPage
 
     private ClipboardService $clipboard_service;
 
+    private IndividualNotesService $individual_notes_service;
+
     private ModuleService $module_service;
 
     private UserService $user_service;
 
     public function __construct(
         ClipboardService $clipboard_service,
+        IndividualNotesService $individual_notes_service,
         ModuleService $module_service,
         UserService $user_service
     ) {
-        $this->clipboard_service = $clipboard_service;
-        $this->module_service    = $module_service;
-        $this->user_service      = $user_service;
+        $this->clipboard_service       = $clipboard_service;
+        $this->individual_notes_service = $individual_notes_service;
+        $this->module_service          = $module_service;
+        $this->user_service            = $user_service;
     }
 
     public function get(ServerRequestInterface $request): ResponseInterface
@@ -108,13 +113,17 @@ final class IndividualPage
             ->map(fn (ModuleShareInterface $module) => $module->share($individual))
             ->filter();
 
+        $notes_facts = $this->individual_notes_service->getFactsWithNotes($individual);
+
         return $this->viewResponse('individual-page', [
             'age'              => $this->ageString($individual),
+            'can_edit'         => $individual->canEdit(),
             'can_upload_media' => Auth::canUploadMedia($tree, Auth::user()),
             'clipboard_facts'  => $this->clipboard_service->pastableFacts($individual),
             'individual_media' => $individual_media,
             'meta_description' => $this->metaDescription($individual),
             'meta_robots'      => 'index,follow',
+            'notes_facts'      => $notes_facts,
             'record'           => $individual,
             'shares'           => $shares,
             'sidebars'         => $this->getSidebars($individual),
