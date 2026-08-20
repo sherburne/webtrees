@@ -47,7 +47,7 @@ class RouteFactory implements RouteFactoryInterface
     /**
      * Generate a URL for a named route.
      *
-     * @param array<bool|int|string|array<string>|null> $parameters
+     * @param array<mixed> $parameters
      */
     public function route(string $route_name, array $parameters = []): string
     {
@@ -80,7 +80,8 @@ class RouteFactory implements RouteFactoryInterface
         // Strip the base path prefix — the Router expects route-relative paths.
         $base_path = parse_url($base_url, PHP_URL_PATH);
         $base_path = is_string($base_path) ? $base_path : '';
-        if ($base_path !== '' && str_starts_with((string) $path, $base_path)) {
+
+        if (str_starts_with((string) $path, $base_path)) {
             $path = substr($path, strlen($base_path));
         }
 
