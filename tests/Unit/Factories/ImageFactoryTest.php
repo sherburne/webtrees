@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace Fisharebest\Webtrees\Tests\Unit\Factories;
 
+use ErrorException;
 use Fisharebest\Webtrees\Enums\ImageOperation;
 use Fisharebest\Webtrees\Exceptions\ImageException;
 use Fisharebest\Webtrees\Factories\ImageFactory;
@@ -170,6 +171,42 @@ class ImageFactoryTest extends TestCase
         );
 
         self::assertNotSame('', $thumbnail);
+    }
+
+    public function testGuardrailMediaFileThumbnailReturnsImageWhenExifDataIsCorrupt(): void
+    {
+        // Mirror app/Http/Middleware/ErrorHandler.php, which converts PHP warnings into exceptions.
+        set_error_handler(static function (int $errno, string $errstr, string $errfile, int $errline): true {
+            throw new ErrorException(
+                message: $errstr,
+                severity: $errno,
+                filename: $errfile,
+                line: $errline,
+            );
+        });
+
+        try {
+            $image_factory = new ImageFactory(new PhpService());
+            $filesystem    = $this->mediaFilesystem();
+            $media_file    = $this->createMediaFileStub(
+                filesystem: $filesystem,
+                filename: 'broken_exif.jpg',
+                mime_type: 'image/jpeg',
+                is_image: true,
+            );
+
+            $thumbnail = $image_factory->mediaFileThumbnail(
+                media_file: $media_file,
+                width: 40,
+                height: 40,
+                operation: ImageOperation::Contain,
+                add_watermark: false,
+            );
+
+            self::assertNotSame('', $thumbnail);
+        } finally {
+            restore_error_handler();
+        }
     }
 
     // Guardrails and failure handling.

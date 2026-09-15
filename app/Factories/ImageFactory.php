@@ -21,6 +21,7 @@ namespace Fisharebest\Webtrees\Factories;
 
 use DOMDocument;
 use DOMElement;
+use ErrorException;
 use Fisharebest\Webtrees\Enums\HttpStatusCode;
 use Fisharebest\Webtrees\Contracts\ImageFactoryInterface;
 use Fisharebest\Webtrees\Enums\ExifOrientation;
@@ -385,7 +386,14 @@ readonly class ImageFactory implements ImageFactoryInterface
         fwrite($stream, $binary);
         rewind($stream);
 
-        $metadata = exif_read_data($stream, 'IFD0');
+        try {
+            $metadata = exif_read_data($stream, 'IFD0');
+        } catch (ErrorException) {
+            // Some images contain malformed EXIF data, which makes exif_read_data() emit a warning.
+            // The ErrorHandler middleware converts warnings into exceptions, so ignore them here.
+            $metadata = false;
+        }
+
         fclose($stream);
 
         if (!is_array($metadata)) {
