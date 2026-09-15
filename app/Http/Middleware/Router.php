@@ -66,7 +66,8 @@ readonly class Router implements MiddlewareInterface
             $pretty = $request;
         } else {
             // Turn the ugly URL into a pretty one, so the router can parse it.
-            $uri    = $request->getUri()->withPath($url_route);
+            // A request with no path - e.g. the site's home page - matches the "/" route.
+            $uri    = $request->getUri()->withPath($url_route === '' ? '/' : $url_route);
             $pretty = $request->withUri($uri);
         }
 
