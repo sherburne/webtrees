@@ -223,6 +223,26 @@ class ValidatorTest extends TestCase
         Validator::queryParams($request)->route('not-route');
     }
 
+    public function testOptionalRouteParameter(): void
+    {
+        $route = new Route(url: '/test', controller: 'test', middleware: []);
+
+        $request = self::createStub(ServerRequestInterface::class);
+        $request
+            ->method('getQueryParams')
+            ->willReturn([
+                'valid-route' => $route,
+                'not-route'   => '',
+            ]);
+
+        self::assertSame($route, Validator::queryParams($request)->routeOptional('valid-route'));
+        self::assertNull(Validator::queryParams($request)->routeOptional('missing-route'));
+
+        $this->expectException(HttpBadRequestException::class);
+
+        Validator::queryParams($request)->routeOptional('not-route');
+    }
+
     public function testRequiredStringParameter(): void
     {
         $request = self::createStub(ServerRequestInterface::class);
