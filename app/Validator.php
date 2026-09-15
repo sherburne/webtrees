@@ -348,6 +348,17 @@ class Validator
         throw new HttpBadRequestException(sprintf('The parameter “%s” is missing.', $parameter));
     }
 
+    public function routeOptional(string $parameter = 'route'): Route|null
+    {
+        $value = $this->parameters[$parameter] ?? null;
+
+        if ($value === null || $value instanceof Route) {
+            return $value;
+        }
+
+        throw new HttpBadRequestException(sprintf('The parameter “%s” is missing.', $parameter));
+    }
+
     public function string(string $parameter, string|null $default = null): string
     {
         $value = $this->parameters[$parameter] ?? null;

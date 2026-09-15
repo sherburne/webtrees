@@ -246,10 +246,10 @@ trait ModuleThemeTrait
         // Return to this page after login...
         $redirect = Validator::queryParams($request)->string('url', (string) $request->getUri());
         $tree     = Validator::attributes($request)->treeOptional();
-        $route    = Validator::attributes($request)->route();
+        $route    = Validator::attributes($request)->routeOptional();
 
         // ...but switch from the tree-page to the user-page
-        if ($route->controller === TreePage::class) {
+        if ($route !== null && $route->controller === TreePage::class) {
             $redirect = route(UserPage::class, ['tree' => $tree]);
         }
 

@@ -30,6 +30,7 @@ use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Tests\TestCase;
 use Illuminate\Support\Collection;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Fisharebest\Webtrees\Http\Middleware\HandleApplicationExceptions;
 
@@ -48,6 +49,22 @@ class HandleApplicationExceptionsTest extends TestCase
         $handler->method('handle')->willThrowException(new HttpInternalServerErrorException('eek'));
 
         $request    = self::createRequest();
+        $middleware = new HandleApplicationExceptions(new ModuleService(), new WebtreesTheme());
+        $response   = $middleware->process($request, $handler);
+
+        self::assertSame(HttpStatusCode::InternalServerError->value, $response->getStatusCode());
+    }
+
+    public function testErrorPageWithNoRouteAttribute(): void
+    {
+        $handler = self::createStub(RequestHandlerInterface::class);
+        $handler->method('handle')->willThrowException(new HttpInternalServerErrorException('eek'));
+
+        $request = self::createRequest()->withoutAttribute('route');
+
+        // The exception handler renders the error page using the request from the container.
+        Registry::container()->set(ServerRequestInterface::class, $request);
+
         $middleware = new HandleApplicationExceptions(new ModuleService(), new WebtreesTheme());
         $response   = $middleware->process($request, $handler);
 
