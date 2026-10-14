@@ -80,6 +80,12 @@ readonly class Router implements MiddlewareInterface
             $path = substr($path, strlen($base_path));
         }
 
+        // An empty path (e.g. no route parameter in ugly-URL mode, or base_url with trailing slash)
+        // should match the "/" route.
+        if ($path === '') {
+            $path = '/';
+        }
+
         // Match the request to a route.
         $matcher = new RouteMatcher($this->route_collection, Registry::container());
         $result  = $matcher->match($path);
