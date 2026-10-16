@@ -31,6 +31,7 @@ use function e;
 use function is_numeric;
 use function nl2br;
 use function str_contains;
+use function str_replace;
 use function str_starts_with;
 use function strip_tags;
 use function trim;
@@ -274,14 +275,20 @@ abstract class AbstractElement implements ElementInterface
 
     /**
      * Display the value of this type of element - convert URLs to links.
+     *
+     * @param bool $new_tab Open links in a new tab/window
      */
-    protected function valueAutoLink(string $value): string
+    protected function valueAutoLink(string $value, bool $new_tab = false): string
     {
         $canonical = $this->canonical($value);
 
         if (str_contains($canonical, 'http://') || str_contains($canonical, 'https://')) {
             $html = Registry::markdownFactory()->autolink($canonical);
             $html = strip_tags($html, ['a', 'br']);
+
+            if ($new_tab) {
+                $html = str_replace('<a ', '<a target="_blank" rel="noopener noreferrer" ', $html);
+            }
         } else {
             $html = nl2br(e($canonical), false);
         }

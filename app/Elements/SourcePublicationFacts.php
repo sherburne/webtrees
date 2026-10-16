@@ -52,6 +52,6 @@ class SourcePublicationFacts extends AbstractElement
      */
     public function value(string $value, Tree $tree): string
     {
-        return $this->valueAutoLink($value);
+        return $this->valueAutoLink($value, true);
     }
 }
