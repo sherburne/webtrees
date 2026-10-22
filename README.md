@@ -191,18 +191,17 @@ revision is running.  It reads this information from `.git` when the repository 
 inside the installation folder.
 
 If the code is checked out from a repository that lives elsewhere (for example a
-bare repository used by a `post-receive` hook), point it at that repository, or
-pass the values directly:
+`post-receive` hook deploying from a bare repository), pass the commit and branch
+that were deployed in the environment:
 
 ```bash
-# A bare repository next to the installation
-cd /opt/webtrees && GIT_DIR=/var/git/webtrees.git composer install
-
-# Or pass the values, when no repository is available
 WEBTREES_BUILD_COMMIT=$(git rev-parse HEAD) \
 WEBTREES_BUILD_BRANCH=$(git rev-parse --abbrev-ref HEAD) \
 composer install
 ```
+
+Note that Composer removes `GIT_DIR` and `GIT_WORK_TREE` from the environment of
+its scripts, so those variables cannot be used to point the command at a repository.
 
 ### Quality and CI
 

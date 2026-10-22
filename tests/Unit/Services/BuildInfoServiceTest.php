@@ -164,21 +164,20 @@ class BuildInfoServiceTest extends TestCase
         self::assertFalse(is_file($filename));
     }
 
-    public function testGitDirectoryFromEnvironment(): void
+    public function testEnvironmentOverridesGitRepository(): void
     {
-        $git_directory = $this->root_dir . 'deploy.git/';
+        $this->createGitFolder();
 
-        mkdir($git_directory . 'refs/heads', 0777, true);
+        file_put_contents($this->root_dir . '.git/HEAD', "ref: refs/heads/main\n");
+        file_put_contents($this->root_dir . '.git/refs/heads/main', "abcdef1234567890abcdef1234567890abcdef12\n");
 
-        file_put_contents($git_directory . 'HEAD', "ref: refs/heads/release\n");
-        file_put_contents($git_directory . 'refs/heads/release', "abcdef1234567890abcdef1234567890abcdef12\n");
-
-        putenv('GIT_DIR=' . $git_directory);
+        putenv('WEBTREES_BUILD_COMMIT=1234567890abcdef1234567890abcdef12345678');
+        putenv('WEBTREES_BUILD_BRANCH=deploy');
 
         $service = $this->service();
 
-        self::assertSame('abcdef1234567890abcdef1234567890abcdef12', $service->gitCommit());
-        self::assertSame('release', $service->gitBranch());
+        self::assertSame('1234567890abcdef1234567890abcdef12345678', $service->gitCommit());
+        self::assertSame('deploy', $service->gitBranch());
     }
 
     public function testEnvironmentOverrides(): void
@@ -209,7 +208,6 @@ class BuildInfoServiceTest extends TestCase
      */
     private function clearEnvironment(): void
     {
-        putenv('GIT_DIR');
         putenv('WEBTREES_BUILD_COMMIT');
         putenv('WEBTREES_BUILD_BRANCH');
     }

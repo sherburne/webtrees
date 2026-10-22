@@ -206,17 +206,6 @@ class BuildInfoService
      */
     private function gitDirectory(): string|null
     {
-        // A git hook exports GIT_DIR to the processes that it runs.
-        $git_dir = $this->environmentVariable('GIT_DIR');
-
-        if ($git_dir !== '') {
-            $path = str_starts_with($git_dir, '/') ? $git_dir : $this->root_dir . $git_dir;
-
-            if (is_file($path . '/HEAD')) {
-                return rtrim($path, '/');
-            }
-        }
-
         $path = $this->root_dir . '.git';
 
         if (is_file($path)) {
