@@ -183,6 +183,27 @@ composer build
 php index.php build-info
 ```
 
+### Deploying from a git repository
+
+`composer install` runs `php index.php build-info`, which writes `build-info.json`
+(build date, git commit and git branch) so that the control panel can show which
+revision is running.  It reads this information from `.git` when the repository is
+inside the installation folder.
+
+If the code is checked out from a repository that lives elsewhere (for example a
+bare repository used by a `post-receive` hook), point it at that repository, or
+pass the values directly:
+
+```bash
+# A bare repository next to the installation
+cd /opt/webtrees && GIT_DIR=/var/git/webtrees.git composer install
+
+# Or pass the values, when no repository is available
+WEBTREES_BUILD_COMMIT=$(git rev-parse HEAD) \
+WEBTREES_BUILD_BRANCH=$(git rev-parse --abbrev-ref HEAD) \
+composer install
+```
+
 ### Quality and CI
 
 Run the full local CI suite:

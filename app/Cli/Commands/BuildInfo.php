@@ -46,7 +46,7 @@ final class BuildInfo extends AbstractCommand
         if ($this->build_info_service->writeBuildInfo($filename)) {
             $output->writeln('Created ' . $filename);
         } else {
-            $output->writeln('Not created ' . $filename . ': no git repository, or the file is not writable.');
+            $output->writeln('Not created ' . $filename . ': no git information available.  Set GIT_DIR, or WEBTREES_BUILD_COMMIT and WEBTREES_BUILD_BRANCH.');
         }
 
         return self::SUCCESS;

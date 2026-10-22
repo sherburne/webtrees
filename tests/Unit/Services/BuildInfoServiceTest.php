@@ -33,6 +33,7 @@ use function is_file;
 use function json_decode;
 use function json_encode;
 use function mkdir;
+use function putenv;
 use function rmdir;
 use function scandir;
 use function sys_get_temp_dir;
@@ -53,11 +54,15 @@ class BuildInfoServiceTest extends TestCase
         $this->root_dir = sys_get_temp_dir() . '/' . uniqid('webtrees-build-info-', true) . '/';
 
         mkdir($this->root_dir, 0777, true);
+
+        $this->clearEnvironment();
     }
 
     protected function tearDown(): void
     {
         $this->removeFolder($this->root_dir);
+
+        $this->clearEnvironment();
 
         parent::tearDown();
     }
@@ -159,11 +164,54 @@ class BuildInfoServiceTest extends TestCase
         self::assertFalse(is_file($filename));
     }
 
+    public function testGitDirectoryFromEnvironment(): void
+    {
+        $git_directory = $this->root_dir . 'deploy.git/';
+
+        mkdir($git_directory . 'refs/heads', 0777, true);
+
+        file_put_contents($git_directory . 'HEAD', "ref: refs/heads/release\n");
+        file_put_contents($git_directory . 'refs/heads/release', "abcdef1234567890abcdef1234567890abcdef12\n");
+
+        putenv('GIT_DIR=' . $git_directory);
+
+        $service = $this->service();
+
+        self::assertSame('abcdef1234567890abcdef1234567890abcdef12', $service->gitCommit());
+        self::assertSame('release', $service->gitBranch());
+    }
+
+    public function testEnvironmentOverrides(): void
+    {
+        putenv('WEBTREES_BUILD_COMMIT=1234567890abcdef1234567890abcdef12345678');
+        putenv('WEBTREES_BUILD_BRANCH=release');
+
+        $filename = $this->root_dir . BuildInfoService::BUILD_INFO_FILE;
+
+        self::assertTrue($this->service()->writeBuildInfo($filename));
+
+        $build_info = json_decode((string) file_get_contents($filename), true, flags: JSON_THROW_ON_ERROR);
+
+        self::assertIsArray($build_info);
+        self::assertSame('1234567890abcdef1234567890abcdef12345678', $build_info['git_commit']);
+        self::assertSame('release', $build_info['git_branch']);
+    }
+
     private function service(): BuildInfoService
     {
         $clock = new FrozenClock(new DateTimeImmutable('2026-10-21 14:32:11', new DateTimeZone('UTC')));
 
         return new BuildInfoService($clock, $this->root_dir);
+    }
+
+    /**
+     * Environment variables from the deployment process can affect the results.
+     */
+    private function clearEnvironment(): void
+    {
+        putenv('GIT_DIR');
+        putenv('WEBTREES_BUILD_COMMIT');
+        putenv('WEBTREES_BUILD_BRANCH');
     }
 
     /**

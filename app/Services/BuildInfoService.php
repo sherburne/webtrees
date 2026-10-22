@@ -28,6 +28,7 @@ use function file;
 use function file_get_contents;
 use function file_put_contents;
 use function filemtime;
+use function getenv;
 use function is_array;
 use function is_dir;
 use function is_file;
@@ -90,6 +91,12 @@ class BuildInfoService
      */
     public function gitCommit(): string
     {
+        $git_commit = $this->environmentVariable('WEBTREES_BUILD_COMMIT');
+
+        if ($git_commit !== '') {
+            return $git_commit;
+        }
+
         $git_directory = $this->gitDirectory();
 
         if ($git_directory !== null) {
@@ -112,6 +119,12 @@ class BuildInfoService
      */
     public function gitBranch(): string
     {
+        $git_branch = $this->environmentVariable('WEBTREES_BUILD_BRANCH');
+
+        if ($git_branch !== '') {
+            return $git_branch;
+        }
+
         $git_directory = $this->gitDirectory();
 
         if ($git_directory !== null) {
@@ -131,15 +144,26 @@ class BuildInfoService
     {
         $git_directory = $this->gitDirectory();
 
-        // Without a git repository, there is no build information to record.
-        if ($git_directory === null) {
+        $git_commit = $this->environmentVariable('WEBTREES_BUILD_COMMIT');
+        $git_branch = $this->environmentVariable('WEBTREES_BUILD_BRANCH');
+
+        if ($git_commit === '' && $git_directory !== null) {
+            $git_commit = $this->readGitCommit($git_directory);
+        }
+
+        if ($git_branch === '' && $git_directory !== null) {
+            $git_branch = $this->readGitBranch($git_directory);
+        }
+
+        // Without git information, there is nothing to record.
+        if ($git_commit === '' && $git_branch === '') {
             return false;
         }
 
         $build_info = [
             'build_date' => $this->clock->now()->format('Y-m-d\TH:i:sP'),
-            'git_commit' => $this->readGitCommit($git_directory),
-            'git_branch' => $this->readGitBranch($git_directory),
+            'git_commit' => $git_commit,
+            'git_branch' => $git_branch,
         ];
 
         $json = json_encode($build_info, JSON_PRETTY_PRINT);
@@ -182,6 +206,17 @@ class BuildInfoService
      */
     private function gitDirectory(): string|null
     {
+        // A git hook exports GIT_DIR to the processes that it runs.
+        $git_dir = $this->environmentVariable('GIT_DIR');
+
+        if ($git_dir !== '') {
+            $path = str_starts_with($git_dir, '/') ? $git_dir : $this->root_dir . $git_dir;
+
+            if (is_file($path . '/HEAD')) {
+                return rtrim($path, '/');
+            }
+        }
+
         $path = $this->root_dir . '.git';
 
         if (is_file($path)) {
@@ -277,6 +312,16 @@ class BuildInfoService
         }
 
         return '';
+    }
+
+    /**
+     * The value of an environment variable, as set by the deployment process.
+     */
+    private function environmentVariable(string $name): string
+    {
+        $value = getenv($name);
+
+        return is_string($value) ? trim($value) : '';
     }
 
     /**

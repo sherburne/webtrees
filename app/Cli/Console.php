@@ -26,6 +26,7 @@ use Fisharebest\Webtrees\Webtrees;
 use Symfony\Component\Console\Application;
 use Throwable;
 
+use function is_file;
 use function parse_ini_file;
 
 final class Console extends Application
@@ -71,10 +72,14 @@ final class Console extends Application
         I18N::init('en-US');
 
         try {
-            $config = parse_ini_file(filename: Webtrees::CONFIG_FILE);
+            $config = [];
 
-            if ($config === false) {
-                $config = [];
+            if (is_file(Webtrees::CONFIG_FILE)) {
+                $config = parse_ini_file(filename: Webtrees::CONFIG_FILE);
+
+                if ($config === false) {
+                    $config = [];
+                }
             }
 
             DB::connect(
