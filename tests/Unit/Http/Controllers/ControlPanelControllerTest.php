@@ -23,6 +23,7 @@ use Fisharebest\Webtrees\Clock\SystemClock;
 use Fisharebest\Webtrees\Enums\HttpStatusCode;
 use Fisharebest\Webtrees\Http\Controllers\ControlPanel;
 use Fisharebest\Webtrees\Services\AdminService;
+use Fisharebest\Webtrees\Services\BuildInfoService;
 use Fisharebest\Webtrees\Services\EmailService;
 use Fisharebest\Webtrees\Services\GedcomImportService;
 use Fisharebest\Webtrees\Services\HousekeepingService;
@@ -65,6 +66,7 @@ class ControlPanelControllerTest extends TestCase
             new SystemClock(),
         );
         $user_service          = new UserService(new SystemClock());
+        $build_info_service    = new BuildInfoService(new SystemClock());
         $controller            = new ControlPanel(
             $admin_service,
             $housekeeping_service,
@@ -75,6 +77,7 @@ class ControlPanelControllerTest extends TestCase
             upgrade_service: $upgrade_service,
             user_service: $user_service,
             clock: new SystemClock(),
+            build_info_service: $build_info_service,
         );
         $request               = self::createRequest();
         $response              = $controller->get();

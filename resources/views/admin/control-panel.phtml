@@ -91,6 +91,7 @@ use Illuminate\Support\Collection;
  * @var Collection<int,ModuleAnalyticsInterface>       $analytics_modules_enabled
  * @var Collection<int,ModuleBlockInterface>           $block_modules_disabled
  * @var Collection<int,ModuleBlockInterface>           $block_modules_enabled
+ * @var string                                         $build_date
  * @var array<int,int>                                 $changes
  * @var Collection<int,ModuleChartInterface>           $chart_modules_disabled
  * @var Collection<int,ModuleChartInterface>           $chart_modules_enabled
@@ -102,6 +103,9 @@ use Illuminate\Support\Collection;
  * @var list<string>                                   $files_to_delete
  * @var Collection<int,ModuleFooterInterface>          $footer_modules_disabled
  * @var Collection<int,ModuleFooterInterface>          $footer_modules_enabled
+ * @var string                                         $git_branch
+ * @var string                                         $git_commit
+ * @var string                                         $git_commit_hash
  * @var Collection<int,ModuleHistoricEventsInterface>  $history_modules_disabled
  * @var Collection<int,ModuleHistoricEventsInterface>  $history_modules_enabled
  * @var Collection<array-key,int>                      $individuals
@@ -168,6 +172,21 @@ use Illuminate\Support\Collection;
             <span class="badge bg-secondary" dir="ltr">
                 <?= e(Webtrees::VERSION) ?>
             </span>
+            <?php if ($build_date !== '') : ?>
+                <span class="badge bg-secondary" dir="ltr" title="<?= e(I18N::translate('Build date') . ': ' . $build_date) ?>">
+                    <?= e($build_date) ?>
+                </span>
+            <?php endif ?>
+            <?php if ($git_commit !== '') : ?>
+                <span class="badge bg-secondary" dir="ltr" title="<?= e(I18N::translate('Git commit') . ': ' . $git_commit_hash) ?>">
+                    <?= e($git_commit) ?>
+                </span>
+            <?php endif ?>
+            <?php if ($git_branch !== '') : ?>
+                <span class="badge bg-secondary" dir="ltr" title="<?= e(I18N::translate('Git branch')) ?>">
+                    <?= e($git_branch) ?>
+                </span>
+            <?php endif ?>
         </h2>
     </div>
     <div class="card-body">

@@ -31,6 +31,7 @@ use function parse_ini_file;
 final class Console extends Application
 {
     private const array COMMANDS = [
+        Commands\BuildInfo::class,
         Commands\CompilePoFiles::class,
         Commands\ConfigIni::class,
         Commands\ConvertFont::class,

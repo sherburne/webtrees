@@ -53,6 +53,7 @@ use Fisharebest\Webtrees\Note;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Repository;
 use Fisharebest\Webtrees\Services\AdminService;
+use Fisharebest\Webtrees\Services\BuildInfoService;
 use Fisharebest\Webtrees\Services\HousekeepingService;
 use Fisharebest\Webtrees\Services\MessageService;
 use Fisharebest\Webtrees\Services\ModuleService;
@@ -75,6 +76,8 @@ final class ControlPanel
     use ViewResponseTrait;
 
     private AdminService $admin_service;
+
+    private BuildInfoService $build_info_service;
 
     private HousekeepingService $housekeeping_service;
 
@@ -102,8 +105,10 @@ final class ControlPanel
         UpgradeService $upgrade_service,
         UserService $user_service,
         ClockInterface $clock,
+        BuildInfoService $build_info_service,
     ) {
         $this->admin_service        = $admin_service;
+        $this->build_info_service   = $build_info_service;
         $this->housekeeping_service = $housekeeping_service;
         $this->message_service      = $message_service;
         $this->module_service       = $module_service;
@@ -128,9 +133,15 @@ final class ControlPanel
         $multiple_tree_threshold = $this->admin_service->multipleTreeThreshold();
         $gedcom_file_count       = $this->admin_service->gedcomFiles(Registry::filesystem()->data())->count();
 
+        $build_timestamp = $this->build_info_service->buildTimestamp();
+
         return $this->viewResponse('admin/control-panel', [
             'title'                             => I18N::translate('Control panel'),
             'now'                               => $this->clock->now()->getTimestamp(),
+            'build_date'                        => $build_timestamp === null ? '' : Registry::timestampFactory()->fromEpoch($build_timestamp)->format('Y-m-d H:i'),
+            'git_commit'                        => $this->build_info_service->gitCommitShort(),
+            'git_commit_hash'                   => $this->build_info_service->gitCommit(),
+            'git_branch'                        => $this->build_info_service->gitBranch(),
             'server_errors'                     => $this->server_check_service->serverErrors(),
             'server_warnings'                   => $this->server_check_service->serverWarnings(),
             'latest_version'                    => $this->upgrade_service->latestVersion(),

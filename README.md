@@ -178,6 +178,9 @@ npm run build
 
 # Create a .ZIP file containing a release
 composer build
+
+# Create a file containing the build date, git commit and git branch
+php index.php build-info
 ```
 
 ### Quality and CI

@@ -2,6 +2,8 @@
 
 /build
 
+/build-info.json
+
 /modules_v4/
 
 /node_modules/
@@ -22,5 +24,7 @@
 /robots.txt
 
 /vendor/
+
+/webtrees/
 
 .DS_Store
