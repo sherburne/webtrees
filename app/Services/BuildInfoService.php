@@ -123,27 +123,34 @@ class BuildInfoService
 
     /**
      * Create a file containing information about this build.
-     * This is used when building a release.
+     * This is used when building a release, and by "composer install".
+     *
+     * @return bool True if the file was created.
      */
-    public function writeBuildInfo(string $filename): void
+    public function writeBuildInfo(string $filename): bool
     {
         $git_directory = $this->gitDirectory();
 
+        // Without a git repository, there is no build information to record.
+        if ($git_directory === null) {
+            return false;
+        }
+
         $build_info = [
             'build_date' => $this->clock->now()->format('Y-m-d\TH:i:sP'),
-            'git_commit' => $git_directory === null ? '' : $this->readGitCommit($git_directory),
-            'git_branch' => $git_directory === null ? '' : $this->readGitBranch($git_directory),
+            'git_commit' => $this->readGitCommit($git_directory),
+            'git_branch' => $this->readGitBranch($git_directory),
         ];
 
         $json = json_encode($build_info, JSON_PRETTY_PRINT);
 
         if ($json === false) {
-            return;
+            return false;
         }
 
-        file_put_contents($filename, $json . "\n");
-
         $this->build_info = null;
+
+        return file_put_contents($filename, $json . "\n") !== false;
     }
 
     /**

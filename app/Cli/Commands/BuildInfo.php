@@ -43,9 +43,11 @@ final class BuildInfo extends AbstractCommand
     {
         $filename = $this->stringArgument(input: $input, name: 'filename');
 
-        $this->build_info_service->writeBuildInfo($filename);
-
-        $output->writeln('Created ' . $filename);
+        if ($this->build_info_service->writeBuildInfo($filename)) {
+            $output->writeln('Created ' . $filename);
+        } else {
+            $output->writeln('Not created ' . $filename . ': no git repository, or the file is not writable.');
+        }
 
         return self::SUCCESS;
     }

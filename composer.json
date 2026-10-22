@@ -124,6 +124,9 @@
             "find resources/css -name *.png -exec pngquant --ext .png --force --skip-if-larger --speed 1 {} \\;",
             "find resources/css -name *.png -exec pngcrush -rem allb -brute -reduce {} {} \\;",
             "find resources/css -name *.png -exec optipng -o7 -zm1-9 {} \\;"
+        ],
+        "post-install-cmd": [
+            "@php index.php build-info"
         ]
     }
 }

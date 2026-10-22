@@ -29,6 +29,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use function file_get_contents;
 use function file_put_contents;
 use function is_dir;
+use function is_file;
 use function json_decode;
 use function json_encode;
 use function mkdir;
@@ -140,7 +141,7 @@ class BuildInfoServiceTest extends TestCase
 
         $filename = $this->root_dir . BuildInfoService::BUILD_INFO_FILE;
 
-        $this->service()->writeBuildInfo($filename);
+        self::assertTrue($this->service()->writeBuildInfo($filename));
 
         $build_info = json_decode((string) file_get_contents($filename), true, flags: JSON_THROW_ON_ERROR);
 
@@ -148,6 +149,14 @@ class BuildInfoServiceTest extends TestCase
         self::assertSame('2026-10-21T14:32:11+00:00', $build_info['build_date']);
         self::assertSame('1234567890abcdef1234567890abcdef12345678', $build_info['git_commit']);
         self::assertSame('main', $build_info['git_branch']);
+    }
+
+    public function testWriteBuildInfoWithoutGitRepository(): void
+    {
+        $filename = $this->root_dir . BuildInfoService::BUILD_INFO_FILE;
+
+        self::assertFalse($this->service()->writeBuildInfo($filename));
+        self::assertFalse(is_file($filename));
     }
 
     private function service(): BuildInfoService
